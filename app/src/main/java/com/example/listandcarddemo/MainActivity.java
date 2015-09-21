@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         public void onBindViewHolder(ViewHolder holder, int position) {
             AssetManager am = mContext.getAssets();
 
-            String filename = mDataset.get(position);
+            String filename = mDataset.get(position % mDataset.size());
             try {
                 InputStream stream = am.open(filename);
                 Drawable drawable = Drawable.createFromStream(stream, filename);
@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getItemCount() {
-            return mDataset.size();
+            return 10000;
         }
     }
 }
