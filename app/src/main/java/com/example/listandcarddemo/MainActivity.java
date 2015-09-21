@@ -46,10 +46,14 @@ public class MainActivity extends AppCompatActivity {
 
         public static class ViewHolder extends RecyclerView.ViewHolder {
             public CardView mCardView;
+            public ImageView mImageView;
+            public TextView mTextView;
 
             public ViewHolder(CardView v) {
                 super(v);
                 mCardView = v;
+                mImageView = (ImageView) v.findViewById(R.id.card_image);
+                mTextView = (TextView) v.findViewById(R.id.card_text);
             }
         }
 
@@ -75,8 +79,8 @@ public class MainActivity extends AppCompatActivity {
                                                        int viewType) {
             CardView v = (CardView) LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.list_item, parent, false);
-            ViewHolder vh = new ViewHolder(v);
-            return vh;
+            ViewHolder holder = new ViewHolder(v);
+            return holder;
         }
 
         @Override
@@ -87,8 +91,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 InputStream stream = am.open(filename);
                 Drawable drawable = Drawable.createFromStream(stream, filename);
-                ((ImageView) holder.mCardView.findViewById(R.id.card_image))
-                        .setImageDrawable(drawable);
+                holder.mImageView.setImageDrawable(drawable);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -96,9 +99,7 @@ public class MainActivity extends AppCompatActivity {
             String animalName = filename
                     .replace(".png", "")
                     .substring(filename.indexOf('-') + 1);
-
-            ((TextView) holder.mCardView.findViewById(R.id.card_text))
-                    .setText(animalName);
+            holder.mTextView.setText(animalName);
         }
 
         @Override
