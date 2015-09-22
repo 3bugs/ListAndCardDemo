@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -16,7 +17,9 @@ import android.widget.TextView;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(true);
 
-        mLayoutManager = new LinearLayoutManager(this);
+        mLayoutManager = new GridLayoutManager(this, 2);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         mAdapter = new MyAdapter(this);
@@ -42,7 +45,8 @@ public class MainActivity extends AppCompatActivity {
     private static class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
         private Context mContext;
-        private List<String> mDataset = new ArrayList<>();
+        private final List<String> mKeyset = new ArrayList<>();
+        private final Map<String, Drawable> mDataset = new HashMap<>();
 
         public static class ViewHolder extends RecyclerView.ViewHolder {
             public CardView mCardView;
@@ -64,14 +68,32 @@ public class MainActivity extends AppCompatActivity {
             AssetManager am = context.getAssets();
             try {
                 String[] filenames = am.list("");
-                for (String f : filenames) {
-                    if (f.length() > 7 && "animals".equals(f.substring(0, 7))) {
-                        mDataset.add(f);
+                for (String filename : filenames) {
+                    if (filename.length() > 7
+                            && "animals".equals(filename.substring(0, 7))) {
+                        String animalName = filename
+                                .replace(".png", "")
+                                .substring(filename.indexOf('-') + 1);
+                        mKeyset.add(animalName);
+                        mDataset.put(animalName, loadImageFile(filename));
                     }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+
+        private Drawable loadImageFile(String filename) {
+            AssetManager am = mContext.getAssets();
+
+            try {
+                InputStream stream = am.open(filename);
+                Drawable drawable = Drawable.createFromStream(stream, filename);
+                return drawable;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
         }
 
         @Override
@@ -85,26 +107,16 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            AssetManager am = mContext.getAssets();
-
-            String filename = mDataset.get(position);
-            try {
-                InputStream stream = am.open(filename);
-                Drawable drawable = Drawable.createFromStream(stream, filename);
-                holder.mImageView.setImageDrawable(drawable);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            String animalName = filename
-                    .replace(".png", "")
-                    .substring(filename.indexOf('-') + 1);
+            String animalName = mKeyset.get(position);
             holder.mTextView.setText(animalName);
+
+            Drawable image = mDataset.get(animalName);
+            holder.mImageView.setImageDrawable(image);
         }
 
         @Override
         public int getItemCount() {
-            return mDataset.size();
+            return mKeyset.size();
         }
     }
 }
